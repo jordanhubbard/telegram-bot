@@ -1,5 +1,5 @@
 import os
-import openai
+from openai import AsyncOpenAI
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
@@ -12,16 +12,15 @@ if not OPENAI_API_KEY or not TELEGRAM_BOT_TOKEN:
     raise EnvironmentError("Missing OPENAI_API_KEY or TELEGRAM_BOT_TOKEN environment variables.")
 
 # Set OpenAI API key
-openai.api_key = OPENAI_API_KEY
+aclient = AsyncOpenAI(api_key=OPENAI_API_KEY)
 
 # OpenAI interaction function
 async def ask_openai(prompt: str) -> str:
     try:
-        response = await openai.ChatCompletion.acreate(
-            model="gpt-4",  # Use GPT-4 or adjust to the latest version available
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.7,  # Adjust temperature for response creativity
-        )
+        response = await aclient.chat.completions.create(model="gpt-4o",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.7)
+
         return response['choices'][0]['message']['content']
     except Exception as e:
         return f"Error communicating with OpenAI: {e}"
