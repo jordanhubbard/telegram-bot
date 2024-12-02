@@ -19,9 +19,14 @@ async def ask_openai(prompt: str) -> str:
     try:
         response = await aclient.chat.completions.create(model="gpt-4o",
         messages=[{"role": "user", "content": prompt}],
+        stream=True,
         temperature=0.7)
 
-        return response['choices'][0]['message']['content']
+        ret = ""
+        async for chunk in response:
+             ret = ret + str(chunk.choices[0].delta.content or "")
+        return ret
+
     except Exception as e:
         return f"Error communicating with OpenAI: {e}"
 
